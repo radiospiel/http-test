@@ -1,39 +1,70 @@
 # Http::Test
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/http/test`. To experiment with that code, run `bin/console` for an interactive prompt.
+The `http-test` ruby gem lets you define HTTP API tests in ruby code. Note that the server can be 
+implemented any way you want, as long as it is either available on a proper URL, or can be started
+in non-daemonized mode with a single command.
 
-TODO: Delete this and the text above, and describe your gem
+## Running HTTP tests against a remove server
 
-## Installation
+    require_relative "./test_helper"
 
-Add this line to your application's Gemfile:
+    class RemoteHttpTest < HttpTest::TestCase
+      url_base "http://jsonplaceholder.typicode.com"
 
-```ruby
-gem 'http-test'
-```
+      def test_get
+        GET "/posts/1"
+        assert_equal(200, response.status)
+        assert_equal(1, response["userId"])
+      end
 
-And then execute:
+      def test_head
+        HEAD "/posts/1"
+        assert_equal(200, response.status)
+        assert(response.body.empty?)
+      end
 
-    $ bundle
+      def test_post
+        POST "/posts", title: "test title", body: "test body"
+        assert_equal(201, response.status)
+        assert_equal("test title", response["title"])
+      end
 
-Or install it yourself as:
+      def test_put
+        PUT "/posts/1", title: "new title"
+        assert_equal(200, response.status)
+      end
 
-    $ gem install http-test
+      def test_delete
+        DELETE "/posts/1"
+        assert_equal(200, response.status)
+      end
+    end
 
-## Usage
+## Running HTTP tests against a local server
 
-TODO: Write usage instructions here
+test-http can also be used to run tests against a local test server. For this, the
+you must define a command to start the server. For this mode you must define a command
+to start the server in a non-daemonized mode.
+
+    class LocalHttpTest < HttpTest::TestCase
+      test_server "#{File.dirname(__FILE__)}/local-http"
+      ...
+    end
+
+**Limitations:**
+
+- The command should read the PORT to listen on from the "PORT" environment value.
+- Currently the only supported port is 4444. Expect this to change to a randomized port number.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/http-test.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/radiospiel/http-test.
 
 ## License
 
