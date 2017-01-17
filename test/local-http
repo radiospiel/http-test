@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+require "webrick"
+require "json"
+require "logger"
+
+class MyServlet < WEBrick::HTTPServlet::AbstractServlet
+  RESULT = { title: "test title", userId: 1 }
+
+  def do_GET(_request, response)
+    response.status = 200
+    response.content_type = "application/json"
+    response.body = RESULT.to_json + "\n"
+  end
+
+  def do_POST(_request, response)
+    response.status = 201
+    response.content_type = "application/json"
+    response.body = RESULT.to_json + "\n"
+  end
+
+  def do_PUT(_request, response)
+    response.status = 200
+    response.content_type = "application/json"
+    response.body = RESULT.to_json + "\n"
+  end
+
+  def do_DELETE(_request, response)
+    response.status = 200
+    response.content_type = "application/json"
+    response.body = RESULT.to_json + "\n"
+  end
+end
+
+logger = Logger.new(File.open("/dev/null", "a+"))
+server = WEBrick::HTTPServer.new(Port: ENV.fetch("PORT").to_i, Logger: logger, AccessLog: logger)
+
+server.mount "/", MyServlet
+
+trap("INT") { server.shutdown }
+
+server.start
