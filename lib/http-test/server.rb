@@ -47,9 +47,10 @@ module HttpTest::Server
       ENV["RACK_ENV"] = "test"
       ENV["PORT"] = PORT.to_s
 
-      STDERR.puts "[http-test] Trying to start test server via '#{command}'"
       exec command
     end
+
+    STDERR.puts "[http-test] Trying to start test server via '#{command}', as pid: #{pid}"
 
     at_exit do
       Process.kill("TERM", pid)
