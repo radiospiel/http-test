@@ -2,27 +2,81 @@ require "test-unit"
 require "forwardable"
 
 module HttpTest
-  PORT = 4444
+  # A session of the test server.
+  class Session
+    attr_reader :url_base
+    attr_reader :command
 
-  def self.url_base(url_base = nil)
-    @url_base = url_base if url_base
-    return @url_base if @url_base
+    def initialize(url_base: nil, command: nil)
+      @url_base = url_base
+      @command  = command
+    end
+
+    def start!
+      return unless @command
+
+      port = Server.start! @command
+      @url_base = "http://localhost:#{port}"
+    end
+  end
+
+  def self.stop_session
+    @session = nil
+  end
+
+  def self.start_session(session)
+    session.start!
+    @session = session
+  end
+
+  def self.url_base
+    return @session.url_base if @session
+
     STDERR.puts <<-MSG
 Either define a API endpoint via url_base <url>, or define a command to start a test_server via test_server "command"'
     MSG
-    exit 1
+    #STDERR.puts "called from\n\t#{caller[0,6].join("\n\t")}"
+    raise "Missing session definition"
   end
 
-  def self.test_server(command)
-    Server.start!(command)
-    url_base "http://localhost:#{PORT}"
-  end
+  # ---------------------------------------------------------------------------
 
   module TestUnitAdapter
-    extend Forwardable
+    module ClassMethods
+      attr_accessor :session_parameters
+    end
 
-    delegate url_base: HttpTest
-    delegate test_server: HttpTest
+    def self.extended(base)
+      base.extend ClassMethods
+    end
+
+    def url_base(url_base)
+      class << self
+        def startup
+          HttpTest.start_session(session_parameters)
+        end
+
+        def shutdown
+          HttpTest.stop_session
+        end
+      end
+
+      self.session_parameters = Session.new url_base: url_base
+    end
+
+    def test_server(command)
+      class << self
+        def startup
+          HttpTest.start_session(session_parameters)
+        end
+
+        def shutdown
+          HttpTest.stop_session
+        end
+      end
+
+      self.session_parameters = Session.new command: command
+    end
   end
 end
 

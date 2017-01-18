@@ -31,11 +31,16 @@ class MyServlet < WEBrick::HTTPServlet::AbstractServlet
   end
 end
 
+port = ENV.fetch("PORT").to_i
 logger = Logger.new(File.open("/dev/null", "a+"))
-server = WEBrick::HTTPServer.new(Port: ENV.fetch("PORT").to_i, Logger: logger, AccessLog: logger)
+#logger = Logger.new(File.open("log/test.log", "a+"))
+server = WEBrick::HTTPServer.new(Port: port, Logger: logger, AccessLog: logger)
+#server = WEBrick::HTTPServer.new(Port: port)
 
 server.mount "/", MyServlet
 
 trap("INT") { server.shutdown }
+
+STDERR.puts "Starting server"
 
 server.start
