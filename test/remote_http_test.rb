@@ -1,6 +1,8 @@
 require_relative "./test_helper"
 
 class RemoteHttpTest < HttpTest::TestCase
+  unless ENV["SKIP_REMOTE_TESTS"]
+
   url_base "http://jsonplaceholder.typicode.com"
 
   def test_get
@@ -29,5 +31,7 @@ class RemoteHttpTest < HttpTest::TestCase
   def test_delete
     DELETE "/posts/1"
     assert_equal(200, response.status)
+  end
+
   end
 end
