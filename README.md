@@ -53,8 +53,26 @@ to start the server in a non-daemonized mode.
 
 **Limitations:**
 
-- The command should read the PORT to listen on from the "PORT" environment value.
-- Currently the only supported port is 4444. Expect this to change to a randomized port number.
+- test servers are always running locally. The port is determined randomly by http-test.
+- The command must read the PORT environment value to determine which port to listen on.
+- When being killed the command must kill all its children. For simple servers this is not a problem; for daemonizing servers or servers that start worker processes you might want to add a shell script which sets up servers correctly. This, for example, is a script which properly deals with a phoenix server:
+
+        #!/bin/bash
+        set -eu
+        
+        HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        cd $HERE
+        
+        _term() { 
+          echo "Caught SIGTERM signal!" 
+          kill -TERM "$child" 2>/dev/null
+        }
+        
+        trap _term SIGTERM
+        mix phoenix.server &
+        
+        child=$! 
+        wait "$child"
 
 ## Development
 

@@ -41,6 +41,4 @@ server.mount "/", MyServlet
 
 trap("INT") { server.shutdown }
 
-STDERR.puts "Starting server"
-
 server.start
