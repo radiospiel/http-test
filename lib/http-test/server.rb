@@ -11,8 +11,7 @@ module HttpTest::Server
     Process.wait
 
     if @port && Port.available?(@port)
-      STDERR.puts "Could not stop server"
-      exit 1
+      STDERR.puts "Warning: Could not stop server at #{url_base}"
     end
 
     @port = nil
