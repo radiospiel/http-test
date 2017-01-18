@@ -4,7 +4,7 @@ require "json"
 require "logger"
 
 class MyServlet < WEBrick::HTTPServlet::AbstractServlet
-  RESULT = { title: "test title", userId: 1 }
+  RESULT = { title: "test title", userId: 1, version: ENV["VERSION"] || "0" }
 
   def do_GET(_request, response)
     response.status = 200

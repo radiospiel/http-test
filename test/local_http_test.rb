@@ -1,12 +1,13 @@
 require_relative "./test_helper"
 
 class LocalHttpTest < HttpTest::TestCase
-  test_server "#{File.dirname(__FILE__)}/local-http"
+  test_server "VERSION=1 #{File.dirname(__FILE__)}/local-http"
 
   def test_get
     GET "/posts/1"
     assert_equal(200, response.status)
     assert_equal(1, response["userId"])
+    assert_equal("1", response["version"])
   end
 
   def test_head
