@@ -15,10 +15,17 @@ module HttpTest
     return @session.url_base if @session
 
     STDERR.puts <<-MSG
-Either define a API endpoint via url_base <url>, or define a command to start a test_server via test_server "command"'
-    MSG
+http-test: I was unable to find a API endpoint.
+
+Either:
+
+- define a API endpoint via `url_base <url>`, if the test server is not controlled by this script, or
+- define a command to start a test_server via `test_server "command"`
+
+MSG
+
     #STDERR.puts "called from\n\t#{caller[0,6].join("\n\t")}"
-    raise "Missing session definition"
+    raise "Missing HttpTest session, you must run HttpTest.start_session first!"
   end
 
   # ---------------------------------------------------------------------------
